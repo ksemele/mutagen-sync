@@ -2,7 +2,7 @@
 
 Monitor and control [Mutagen](https://mutagen.io) sync sessions directly from VSCode.
 
-[![Install from Marketplace](https://img.shields.io/visual-studio-marketplace/v/ksemele.mutagen-sync?label=VS%20Code%20Marketplace&logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=ksemele.mutagen-sync)
+[![VS Code Marketplace](https://vsmarketplacebadges.dev/version/ksemele.mutagen-sync.png)](https://marketplace.visualstudio.com/items?itemName=ksemele.mutagen-sync)
 
 ## Features
 
