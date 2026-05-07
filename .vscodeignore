@@ -1,0 +1,13 @@
+src/
+dist/
+DEVELOPMENT.md
+.vscode/
+.claude/
+node_modules/
+tsconfig.json
+.gitignore
+*.map
+*.vsix
+images/icon.svg
+test-env/keys/
+test-env/sync-dirs/

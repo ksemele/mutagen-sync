@@ -1,0 +1,233 @@
+{
+  "name": "mutagen-sync",
+  "displayName": "Mutagen Sync",
+  "description": "Monitor and control Mutagen sync sessions",
+  "version": "0.1.1",
+  "publisher": "ksemele",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ksemele/mutagen-sync"
+  },
+  "bugs": {
+    "url": "https://github.com/ksemele/mutagen-sync/issues"
+  },
+  "homepage": "https://github.com/ksemele/mutagen-sync#readme",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "icon": "images/icon.png",
+  "main": "./out/extension.js",
+  "contributes": {
+    "views": {
+      "explorer": [
+        {
+          "id": "mutagenSessions",
+          "name": "Mutagen Sync"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "mutagen.refresh",
+        "title": "Mutagen: Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "mutagen.pauseSession",
+        "title": "Mutagen: Pause Session",
+        "icon": "$(debug-pause)"
+      },
+      {
+        "command": "mutagen.resumeSession",
+        "title": "Mutagen: Resume Session",
+        "icon": "$(debug-start)"
+      },
+      {
+        "command": "mutagen.flushSession",
+        "title": "Mutagen: Flush (Force Sync)",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "mutagen.hideSession",
+        "title": "Mutagen: Hide Session",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "mutagen.unhideSession",
+        "title": "Mutagen: Show Session",
+        "icon": "$(eye-closed)"
+      },
+      {
+        "command": "mutagen.pauseAll",
+        "title": "Mutagen: Pause All",
+        "icon": "$(debug-pause)"
+      },
+      {
+        "command": "mutagen.resumeAll",
+        "title": "Mutagen: Resume All",
+        "icon": "$(debug-start)"
+      },
+      {
+        "command": "mutagen.unhideAll",
+        "title": "Mutagen: Show All Sessions",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "mutagen.pauseAllHidden",
+        "title": "Mutagen: Pause All Hidden",
+        "icon": "$(debug-pause)"
+      },
+      {
+        "command": "mutagen.resumeAllHidden",
+        "title": "Mutagen: Resume All Hidden",
+        "icon": "$(debug-start)"
+      },
+      {
+        "command": "mutagen.openSettings",
+        "title": "Mutagen: Settings",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "mutagen.terminateSession",
+        "title": "Mutagen: Terminate Session",
+        "icon": "$(trash)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "mutagen.resumeAll",
+          "when": "view == mutagenSessions",
+          "group": "navigation@1"
+        },
+        {
+          "command": "mutagen.pauseAll",
+          "when": "view == mutagenSessions",
+          "group": "navigation@2"
+        },
+        {
+          "command": "mutagen.refresh",
+          "when": "view == mutagenSessions",
+          "group": "navigation@3"
+        },
+        {
+          "command": "mutagen.openSettings",
+          "when": "view == mutagenSessions",
+          "group": "navigation@4"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "mutagen.pauseSession",
+          "when": "view == mutagenSessions && viewItem =~ /^session-active/",
+          "group": "inline@1"
+        },
+        {
+          "command": "mutagen.resumeSession",
+          "when": "view == mutagenSessions && viewItem =~ /^session-(paused|error)/",
+          "group": "inline@1"
+        },
+        {
+          "command": "mutagen.flushSession",
+          "when": "view == mutagenSessions && viewItem =~ /^session-active/",
+          "group": "inline@2"
+        },
+        {
+          "command": "mutagen.hideSession",
+          "when": "view == mutagenSessions && viewItem =~ /^session-(active|paused|error|unknown)$/",
+          "group": "inline@3"
+        },
+        {
+          "command": "mutagen.unhideSession",
+          "when": "view == mutagenSessions && viewItem =~ /-hidden$/",
+          "group": "inline@3"
+        },
+        {
+          "command": "mutagen.resumeAllHidden",
+          "when": "view == mutagenSessions && viewItem == group",
+          "group": "inline@1"
+        },
+        {
+          "command": "mutagen.pauseAllHidden",
+          "when": "view == mutagenSessions && viewItem == group",
+          "group": "inline@2"
+        },
+        {
+          "command": "mutagen.unhideAll",
+          "when": "view == mutagenSessions && viewItem == group",
+          "group": "inline@3"
+        },
+        {
+          "command": "mutagen.terminateSession",
+          "when": "view == mutagenSessions && viewItem =~ /^session-/",
+          "group": "inline@4"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Mutagen Sync",
+      "properties": {
+        "mutagen.refreshInterval": {
+          "type": "number",
+          "default": 10,
+          "minimum": 3,
+          "description": "How often to refresh session status (seconds)"
+        },
+        "mutagen.binaryPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to mutagen binary (leave empty to auto-detect)"
+        },
+        "mutagen.statusBarColorByStatus": {
+          "type": "boolean",
+          "default": false,
+          "description": "Tint the status bar item text color based on session status: green when all OK, yellow when paused/syncing, red when errors"
+        },
+        "mutagen.showSessionCounts": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show healthy/total session count after the status icon (e.g. $(check) mutagen 2/3)"
+        },
+        "mutagen.coloredIcons": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use colored icons in the session tree view"
+        },
+        "mutagen.alphaLabel": {
+          "type": "string",
+          "default": "α",
+          "description": "Label for the alpha endpoint in the tree view (e.g. 'src', 'local')"
+        },
+        "mutagen.betaLabel": {
+          "type": "string",
+          "default": "β",
+          "description": "Label for the beta endpoint in the tree view (e.g. 'dst', 'remote')"
+        },
+        "mutagen.confirmTerminate": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ask for confirmation before terminating a session"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "mkdir -p dist && vsce package --out dist/ --no-dependencies",
+    "publish": "vsce publish --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.9.1",
+    "typescript": "^5.3.0"
+  }
+}

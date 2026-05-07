@@ -1,0 +1,21 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="128" height="128" rx="22" fill="#1c2038"/>
+
+  <!-- Hexagon ring, based on original Mutagen logo shape -->
+  <!-- Outer r=52: right(116,64) tr(90,19) tl(38,19) left(12,64) bl(38,109) br(90,109) -->
+  <!-- Inner r=43: right(107,64) tr(85.5,26.8) tl(42.5,26.8) left(21,64) bl(42.5,101.2) br(85.5,101.2) -->
+  <path fill-rule="evenodd" fill="#d6e4ef"
+    d="M 90,19 L 116,64 L 90,109 L 38,109 L 12,64 L 38,19 Z
+       M 85.5,26.8 L 107,64 L 85.5,101.2 L 42.5,101.2 L 21,64 L 42.5,26.8 Z"/>
+
+  <!-- Bidirectional sync arrows, r=19, centered at (64,64) -->
+  <!-- Arc 1: from 0° (83,64) clockwise 150° to 150° (47.55,73.5) -->
+  <!-- Arc 2: from 180° (45,64) clockwise 150° to 330° (80.45,54.5) -->
+  <g fill="none" stroke="#3db8e8" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 83,64 A 19,19 0 0,1 47.55,73.5"/>
+    <polyline points="47.55,80.5 47.55,73.5 53.61,77"/>
+    <path d="M 45,64 A 19,19 0 0,1 80.45,54.5"/>
+    <polyline points="80.45,47.5 80.45,54.5 74.39,51"/>
+  </g>
+</svg>

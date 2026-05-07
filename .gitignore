@@ -1,0 +1,11 @@
+out/
+dist/
+node_modules/
+*.vsix
+
+# AI tool local settings
+.claude/
+.cursor/
+.aider*
+.copilot/
+CLAUDE.md
