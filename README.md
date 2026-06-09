@@ -4,6 +4,8 @@ Monitor and control [Mutagen](https://mutagen.io) sync sessions directly from VS
 
 [![VS Code Marketplace](https://vsmarketplacebadges.dev/version/ksemele.mutagen-sync.png)](https://marketplace.visualstudio.com/items?itemName=ksemele.mutagen-sync)
 
+[Open VSX - antigravity, etc](https://open-vsx.org/extension/ksemele/mutagen-sync)
+
 ## Features
 
 - **Status bar** — shows session health at a glance; click to open the panel
