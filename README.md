@@ -12,7 +12,7 @@ Monitor and control [Mutagen](https://mutagen.io) sync sessions directly from VS
 - **Bulk actions** — Pause All / Resume All from the panel toolbar
 - **Auto-refresh** — every 10 seconds (configurable)
 - **Hidden sessions** — hide sessions from the main list without terminating them
-- **Workspace mode** (opt-in, `mutagen.workspaceMode`) — sessions tied to the open workspace come first, grouped under a project node for its `mutagen.yml` with Start (`mutagen project start`) and Terminate (`mutagen project terminate`) buttons; everything else sits in a collapsed "Other Sessions" group (or is hidden entirely) and stays out of the status bar and Pause/Resume All
+- **Workspace mode** (opt-in, `mutagen.workspaceMode`) — sessions tied to the open workspace come first, grouped under a project node for its `mutagen.yml` with Start / Pause / Resume / Terminate buttons (`mutagen project …`); everything else sits in a collapsed "Other Sessions" group (or is hidden entirely) and stays out of the status bar and Pause/Resume All
 
 ## Screenshots
 

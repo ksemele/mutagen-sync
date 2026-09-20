@@ -2,7 +2,8 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { SyncSession, SessionStatus, ProjectInfo, partitionSessions } from './mutagenService';
 
-export type ProjectState = 'running' | 'stopped' | 'stale';
+/** running-* variants say whether the project's sessions are active, paused, or a mix — drives Pause/Resume buttons. */
+export type ProjectState = 'running-active' | 'running-paused' | 'running-mixed' | 'stopped' | 'stale';
 
 type ItemData =
     | { type: 'session'; session: SyncSession; hidden: boolean }
@@ -105,17 +106,24 @@ function buildTooltip(s: SyncSession): vscode.MarkdownString {
 function buildProjectTooltip(p: ProjectInfo, state: ProjectState, sessionCount: number): vscode.MarkdownString {
     const md = new vscode.MarkdownString();
     md.appendMarkdown(`**${p.name}** — \`${p.projectFile}\`\n\n`);
+    const n = `${sessionCount} session${sessionCount === 1 ? '' : 's'}`;
     switch (state) {
-        case 'running': md.appendMarkdown(`Running: ${sessionCount} session${sessionCount === 1 ? '' : 's'}`); break;
+        case 'running-active': md.appendMarkdown(`Running: ${n}`); break;
+        case 'running-paused': md.appendMarkdown(`Paused: ${n}`); break;
+        case 'running-mixed':  md.appendMarkdown(`Partially paused: ${n}`); break;
         case 'stopped': md.appendMarkdown('Not started'); break;
         case 'stale':   md.appendMarkdown('Lock file present but no sessions — terminate to clean up, then start'); break;
     }
     return md;
 }
 
-function projectState(p: ProjectInfo, sessionCount: number): ProjectState {
+function projectState(p: ProjectInfo, sessions: SyncSession[]): ProjectState {
     if (!p.lockedId) return 'stopped';
-    return sessionCount > 0 ? 'running' : 'stale';
+    if (sessions.length === 0) return 'stale';
+    const active = sessions.filter(s => s.status === 'watching' || s.status === 'syncing' || s.status === 'connecting').length;
+    if (active === sessions.length) return 'running-active';
+    if (active === 0) return 'running-paused';
+    return 'running-mixed';
 }
 
 export class MutagenSessionProvider implements vscode.TreeDataProvider<MutagenTreeItem> {
@@ -171,7 +179,7 @@ export class MutagenSessionProvider implements vscode.TreeDataProvider<MutagenTr
                 const own = this.projectSessions(p, workspace);
                 own.forEach(s => inProject.add(s.name));
                 items.push(new MutagenTreeItem({
-                    type: 'project', project: p, state: projectState(p, own.length), sessionCount: own.length,
+                    type: 'project', project: p, state: projectState(p, own), sessionCount: own.length,
                 }));
             }
             for (const s of workspace) {

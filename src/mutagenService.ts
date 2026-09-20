@@ -166,6 +166,14 @@ export async function projectStart(mutagenPath: string, project: ProjectInfo): P
     await execAsync(`"${mutagenPath}" project start -f "${project.projectFile}"`, { cwd: project.folder });
 }
 
+export async function projectPause(mutagenPath: string, project: ProjectInfo): Promise<void> {
+    await execAsync(`"${mutagenPath}" project pause -f "${project.projectFile}"`, { cwd: project.folder });
+}
+
+export async function projectResume(mutagenPath: string, project: ProjectInfo): Promise<void> {
+    await execAsync(`"${mutagenPath}" project resume -f "${project.projectFile}"`, { cwd: project.folder });
+}
+
 export async function projectTerminate(mutagenPath: string, project: ProjectInfo): Promise<void> {
     await execAsync(`"${mutagenPath}" project terminate -f "${project.projectFile}"`, { cwd: project.folder });
 }

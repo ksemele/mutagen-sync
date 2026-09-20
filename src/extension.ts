@@ -212,6 +212,26 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             await refresh();
         }),
 
+        vscode.commands.registerCommand('mutagen.projectPause', async (item: MutagenTreeItem) => {
+            if (item?.data.type !== 'project') return;
+            try {
+                await service.projectPause(mutagenPath as string, item.data.project);
+            } catch (err: unknown) {
+                vscode.window.showErrorMessage(`Project pause failed: ${err instanceof Error ? err.message : err}`);
+            }
+            await refresh();
+        }),
+
+        vscode.commands.registerCommand('mutagen.projectResume', async (item: MutagenTreeItem) => {
+            if (item?.data.type !== 'project') return;
+            try {
+                await service.projectResume(mutagenPath as string, item.data.project);
+            } catch (err: unknown) {
+                vscode.window.showErrorMessage(`Project resume failed: ${err instanceof Error ? err.message : err}`);
+            }
+            await refresh();
+        }),
+
         vscode.commands.registerCommand('mutagen.projectTerminate', async (item: MutagenTreeItem) => {
             if (item?.data.type !== 'project') return;
             const { project, sessionCount } = item.data;

@@ -108,6 +108,16 @@
         "command": "mutagen.projectTerminate",
         "title": "Mutagen: Terminate Project",
         "icon": "$(trash)"
+      },
+      {
+        "command": "mutagen.projectPause",
+        "title": "Mutagen: Pause Project",
+        "icon": "$(debug-pause)"
+      },
+      {
+        "command": "mutagen.projectResume",
+        "title": "Mutagen: Resume Project",
+        "icon": "$(debug-start)"
       }
     ],
     "menus": {
@@ -185,9 +195,19 @@
           "group": "inline@1"
         },
         {
-          "command": "mutagen.projectTerminate",
-          "when": "view == mutagenSessions && viewItem =~ /^project-(running|stale)$/",
+          "command": "mutagen.projectPause",
+          "when": "view == mutagenSessions && viewItem =~ /^project-running-(active|mixed)$/",
+          "group": "inline@1"
+        },
+        {
+          "command": "mutagen.projectResume",
+          "when": "view == mutagenSessions && viewItem =~ /^project-running-(paused|mixed)$/",
           "group": "inline@2"
+        },
+        {
+          "command": "mutagen.projectTerminate",
+          "when": "view == mutagenSessions && viewItem =~ /^project-(running-.*|stale)$/",
+          "group": "inline@3"
         }
       ]
     },
