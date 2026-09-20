@@ -12,8 +12,7 @@ Monitor and control [Mutagen](https://mutagen.io) sync sessions directly from VS
 - **Bulk actions** — Pause All / Resume All from the panel toolbar
 - **Auto-refresh** — every 10 seconds (configurable)
 - **Hidden sessions** — hide sessions from the main list without terminating them
-- **Workspace-scoped** — sessions tied to the open workspace come first; everything else sits in a collapsed "Other Sessions" group (or is hidden entirely) and stays out of the status bar and Pause/Resume All
-- **Projects** — a `mutagen.yml` in the workspace shows up as a project node with Start (`mutagen project start`) and Terminate (`mutagen project terminate`) buttons
+- **Workspace mode** (opt-in, `mutagen.workspaceMode`) — sessions tied to the open workspace come first, grouped under a project node for its `mutagen.yml` with Start (`mutagen project start`) and Terminate (`mutagen project terminate`) buttons; everything else sits in a collapsed "Other Sessions" group (or is hidden entirely) and stays out of the status bar and Pause/Resume All
 
 ## Screenshots
 
@@ -51,6 +50,7 @@ Full installation guide: [mutagen.io](https://mutagen.io) · [GitHub releases](h
 | `mutagen.alphaLabel` | `α` | Label for the alpha endpoint in tree view tooltips |
 | `mutagen.betaLabel` | `β` | Label for the beta endpoint in tree view tooltips |
 | `mutagen.confirmTerminate` | `true` | Ask for confirmation before terminating a session or project (termination is permanent and cannot be undone) |
-| `mutagen.otherSessions` | `collapsed` | Sessions not tied to the open workspace: `collapsed` group or `hidden` |
+| `mutagen.workspaceMode` | `false` | Scope the panel to the open workspace and show project nodes with Start / Terminate |
+| `mutagen.otherSessions` | `collapsed` | Workspace mode only — sessions not tied to the open workspace: `collapsed` group or `hidden` |
 
 Open settings: **Cmd+,** → search `mutagen`, or click the gear icon in the Mutagen Sync panel.

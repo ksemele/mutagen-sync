@@ -39,7 +39,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         await context.workspaceState.update('hiddenSessions', [...names]);
     }
 
+    /** Workspace folders to scope by — empty (flat list, all sessions) unless `mutagen.workspaceMode` is on. */
     function workspaceFolders(): string[] {
+        const enabled = vscode.workspace.getConfiguration('mutagen').get<boolean>('workspaceMode', false);
+        if (!enabled) return [];
         return vscode.workspace.workspaceFolders?.map(f => f.uri.fsPath) ?? [];
     }
 

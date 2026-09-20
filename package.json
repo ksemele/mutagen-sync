@@ -235,6 +235,11 @@
           "default": true,
           "description": "Ask for confirmation before terminating a session"
         },
+        "mutagen.workspaceMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Scope the panel to the open workspace: sessions with a local endpoint inside a workspace folder (or belonging to its mutagen.yml project) are listed first, grouped under a project node with Start / Terminate buttons; the status bar and Pause All / Resume All cover only those sessions. Off: flat list of all sessions"
+        },
         "mutagen.otherSessions": {
           "type": "string",
           "enum": [
@@ -246,7 +251,7 @@
             "Show sessions not tied to the open workspace in a collapsed 'Other Sessions' group",
             "Do not show sessions not tied to the open workspace"
           ],
-          "description": "How to show sessions that don't belong to the open workspace (no local endpoint inside it and not part of its mutagen.yml project)"
+          "description": "Workspace mode only: how to show sessions that don't belong to the open workspace"
         }
       }
     }
