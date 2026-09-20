@@ -25,6 +25,9 @@ Monitor and control [Mutagen](https://mutagen.io) sync sessions directly from VS
 ![Panel with less colors](images/panel_colorless.png)
 *You can disable some colors in the settings and more*
 
+![Workspace mode with a project node](images/workspace.png)
+*Workspace mode: the `mutagen.yml` project of the open folder with its sessions, everything else collapsed under Other Sessions*
+
 ## Requirements
 
 Mutagen must be installed and the daemon must be running before the extension activates.
