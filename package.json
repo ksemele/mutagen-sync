@@ -258,7 +258,7 @@
         "mutagen.workspaceMode": {
           "type": "boolean",
           "default": false,
-          "description": "Scope the panel to the open workspace: sessions with a local endpoint inside a workspace folder (or belonging to its mutagen.yml project) are listed first, grouped under a project node with Start / Terminate buttons; the status bar and Pause All / Resume All cover only those sessions. Off: flat list of all sessions"
+          "description": "Scope the panel to the open workspace: sessions with a local endpoint inside a workspace folder (or belonging to its mutagen.yml project) are listed first, grouped under a project node with Start / Pause / Resume / Terminate buttons; Pause All / Resume All cover only those sessions (the status bar always covers all). Off: flat list of all sessions"
         },
         "mutagen.otherSessions": {
           "type": "string",

@@ -65,8 +65,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             ]);
             const hidden = getHiddenNames();
             provider.update(sessions, undefined, hidden, folders, projects);
-            const { workspace } = service.partitionSessions(sessions, folders, projects);
-            updateStatusBar(statusBar, workspace.filter(s => !hidden.has(s.name)));
+            // The status bar is a global health indicator — it always covers every session,
+            // regardless of workspace mode (which only scopes the tree and Pause/Resume All)
+            updateStatusBar(statusBar, sessions.filter(s => !hidden.has(s.name)));
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : String(err);
             const clean = msg.replace(/^Command failed: .*\n/, '').trim();
