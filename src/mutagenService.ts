@@ -185,12 +185,7 @@ export async function findProjects(folders: string[]): Promise<ProjectInfo[]> {
         for (const fileName of PROJECT_FILE_NAMES) {
             const projectFile = path.join(folder, fileName);
             if (!fs.existsSync(projectFile)) continue;
-            let lockedId: string | null = null;
-            try {
-                const lock = fs.readFileSync(projectFile + '.lock', 'utf8').trim();
-                if (lock) lockedId = lock;
-            } catch { /* not started */ }
-            projects.push({ folder, name: path.basename(folder), projectFile, lockedId });
+            projects.push({ folder, name: path.basename(folder), projectFile, lockedId: readLockId(projectFile) });
             break;
         }
     }
@@ -200,6 +195,48 @@ export async function findProjects(folders: string[]): Promise<ProjectInfo[]> {
 /** True for a local filesystem endpoint URL (as opposed to SSH / docker / tunnel). */
 function isLocalUrl(url: string): boolean {
     return url.startsWith('/') || url.startsWith('~') || /^[A-Za-z]:[\\/]/.test(url);
+}
+
+function readLockId(projectFile: string): string | null {
+    try {
+        const lock = fs.readFileSync(projectFile + '.lock', 'utf8').trim();
+        return lock || null;
+    } catch {
+        return null;
+    }
+}
+
+/** Walk up from a session's local endpoint looking for the project file whose lock holds `projectId`. */
+function locateProjectFile(startPath: string, projectId: string): string | null {
+    let dir = startPath;
+    for (;;) {
+        for (const fileName of PROJECT_FILE_NAMES) {
+            const projectFile = path.join(dir, fileName);
+            if (fs.existsSync(projectFile) && readLockId(projectFile) === projectId) return projectFile;
+        }
+        const parent = path.dirname(dir);
+        if (parent === dir) return null;
+        dir = parent;
+    }
+}
+
+/** Recover ProjectInfo for project sessions outside the workspace (`known` are the workspace projects).
+ *  Sessions whose project file can't be located from their local endpoint are left ungrouped. */
+export function discoverProjects(sessions: SyncSession[], known: ProjectInfo[]): ProjectInfo[] {
+    const found = new Map<string, ProjectInfo>();
+    const knownIds = new Set(known.map(p => p.lockedId).filter(Boolean));
+    for (const s of sessions) {
+        if (!s.projectId || knownIds.has(s.projectId) || found.has(s.projectId)) continue;
+        for (const url of [s.alphaUrl, s.betaUrl]) {
+            if (!isLocalUrl(url)) continue;
+            const projectFile = locateProjectFile(url, s.projectId);
+            if (!projectFile) continue;
+            const folder = path.dirname(projectFile);
+            found.set(s.projectId, { folder, name: path.basename(folder), projectFile, lockedId: s.projectId });
+            break;
+        }
+    }
+    return [...found.values()];
 }
 
 function isInsideFolder(url: string, folder: string): boolean {

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { SyncSession, SessionStatus, ProjectInfo, partitionSessions } from './mutagenService';
+import { SyncSession, SessionStatus, ProjectInfo, partitionSessions, discoverProjects } from './mutagenService';
 
 /** running-* variants say whether the project's sessions are active, paused, or a mix — drives Pause/Resume buttons. */
 export type ProjectState = 'running-active' | 'running-paused' | 'running-mixed' | 'stopped' | 'stale';
@@ -164,6 +164,25 @@ export class MutagenSessionProvider implements vscode.TreeDataProvider<MutagenTr
 
     private isHidden = (s: SyncSession): boolean => this.hiddenNames.has(s.name);
 
+    /** Project nodes for `projects` followed by the sessions in `pool` that belong to none of them. */
+    private projectsAndLoose(projects: ProjectInfo[], pool: SyncSession[]): MutagenTreeItem[] {
+        const items: MutagenTreeItem[] = [];
+        const inProject = new Set<string>();
+        for (const p of projects) {
+            const own = this.projectSessions(p, pool);
+            own.forEach(s => inProject.add(s.name));
+            items.push(new MutagenTreeItem({
+                type: 'project', project: p, state: projectState(p, own), sessions: own,
+                allHidden: own.length > 0 && own.every(this.isHidden),
+            }));
+        }
+        for (const s of pool) {
+            if (inProject.has(s.name) || this.isHidden(s)) continue;
+            items.push(new MutagenTreeItem({ type: 'session', session: s, hidden: false }));
+        }
+        return items;
+    }
+
     getTreeItem(element: MutagenTreeItem): vscode.TreeItem {
         return element;
     }
@@ -178,22 +197,9 @@ export class MutagenSessionProvider implements vscode.TreeDataProvider<MutagenTr
             }
 
             const { workspace, other } = partitionSessions(this.sessions, this.folders, this.projects);
-            const items: MutagenTreeItem[] = [];
 
             // Project nodes first, then workspace sessions that don't belong to a project
-            const inProject = new Set<string>();
-            for (const p of this.projects) {
-                const own = this.projectSessions(p, workspace);
-                own.forEach(s => inProject.add(s.name));
-                items.push(new MutagenTreeItem({
-                    type: 'project', project: p, state: projectState(p, own), sessions: own,
-                    allHidden: own.length > 0 && own.every(this.isHidden),
-                }));
-            }
-            for (const s of workspace) {
-                if (inProject.has(s.name) || this.isHidden(s)) continue;
-                items.push(new MutagenTreeItem({ type: 'session', session: s, hidden: false }));
-            }
+            const items = this.projectsAndLoose(this.projects, workspace);
 
             // Other Sessions: always collapsed; disappears once every session in it is hidden
             const otherVisible = other.filter(s => !this.isHidden(s));
@@ -214,8 +220,11 @@ export class MutagenSessionProvider implements vscode.TreeDataProvider<MutagenTr
         }
 
         if (element.data.type === 'group') {
-            const hidden = element.data.kind === 'hidden';
-            return element.data.sessions.map(s => new MutagenTreeItem({ type: 'session', session: s, hidden }));
+            if (element.data.kind === 'hidden') {
+                return element.data.sessions.map(s => new MutagenTreeItem({ type: 'session', session: s, hidden: true }));
+            }
+            // Other Sessions mirrors the top level: project nodes (located via their lock files), then loose sessions
+            return this.projectsAndLoose(discoverProjects(element.data.sessions, this.projects), element.data.sessions);
         }
 
         if (element.data.type === 'project') {
