@@ -9,8 +9,9 @@ type ItemData =
     | { type: 'session'; session: SyncSession; hidden: boolean }
     | { type: 'detail'; label: string; icon: string; color?: string }
     | { type: 'message'; text: string; icon: string }
-    | { type: 'group'; kind: 'hidden' | 'other'; label: string; icon: string }
-    | { type: 'project'; project: ProjectInfo; state: ProjectState; sessionCount: number };
+    | { type: 'group'; kind: 'hidden' | 'other'; label: string; icon: string; sessions: SyncSession[] }
+    /** `sessions` are all sessions of the project, hidden ones included; `allHidden` drives the eye button. */
+    | { type: 'project'; project: ProjectInfo; state: ProjectState; sessions: SyncSession[]; allHidden: boolean };
 
 export class MutagenTreeItem extends vscode.TreeItem {
     constructor(public readonly data: ItemData) {
@@ -40,12 +41,16 @@ export class MutagenTreeItem extends vscode.TreeItem {
             this.contextValue = data.kind === 'hidden' ? 'group' : 'group-other';
         } else if (data.type === 'project') {
             const p = data.project;
+            const file = path.basename(p.projectFile);
             this.label = p.name;
-            this.description = path.basename(p.projectFile);
-            this.collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
+            this.description = data.allHidden ? `[hidden] ${file}` : file;
+            this.collapsibleState = data.allHidden
+                ? vscode.TreeItemCollapsibleState.None
+                : vscode.TreeItemCollapsibleState.Expanded;
             this.iconPath = new vscode.ThemeIcon('root-folder');
-            this.contextValue = `project-${data.state}`;
-            this.tooltip = buildProjectTooltip(p, data.state, data.sessionCount);
+            // Same convention as sessions: `-hidden` suffix on top of the state
+            this.contextValue = `project-${data.state}${data.allHidden ? '-hidden' : ''}`;
+            this.tooltip = buildProjectTooltip(p, data.state, data.sessions.length);
         } else {
             this.label = data.text;
             this.iconPath = new vscode.ThemeIcon(data.icon);
@@ -151,11 +156,13 @@ export class MutagenSessionProvider implements vscode.TreeDataProvider<MutagenTr
         this._onDidChangeTreeData.fire();
     }
 
-    /** Sessions of a project: those carrying its locked id, excluding hidden ones. */
+    /** Sessions of a project: those carrying its locked id (hidden ones included). */
     private projectSessions(p: ProjectInfo, pool: SyncSession[]): SyncSession[] {
         if (!p.lockedId) return [];
-        return pool.filter(s => s.projectId === p.lockedId && !this.hiddenNames.has(s.name));
+        return pool.filter(s => s.projectId === p.lockedId);
     }
+
+    private isHidden = (s: SyncSession): boolean => this.hiddenNames.has(s.name);
 
     getTreeItem(element: MutagenTreeItem): vscode.TreeItem {
         return element;
@@ -179,43 +186,41 @@ export class MutagenSessionProvider implements vscode.TreeDataProvider<MutagenTr
                 const own = this.projectSessions(p, workspace);
                 own.forEach(s => inProject.add(s.name));
                 items.push(new MutagenTreeItem({
-                    type: 'project', project: p, state: projectState(p, own), sessionCount: own.length,
+                    type: 'project', project: p, state: projectState(p, own), sessions: own,
+                    allHidden: own.length > 0 && own.every(this.isHidden),
                 }));
             }
             for (const s of workspace) {
-                if (inProject.has(s.name) || this.hiddenNames.has(s.name)) continue;
+                if (inProject.has(s.name) || this.isHidden(s)) continue;
                 items.push(new MutagenTreeItem({ type: 'session', session: s, hidden: false }));
             }
 
-            const showOther = vscode.workspace.getConfiguration('mutagen').get<string>('otherSessions', 'collapsed');
-            const otherVisible = other.filter(s => !this.hiddenNames.has(s.name));
-            if (showOther === 'collapsed' && otherVisible.length > 0) {
+            // Other Sessions: always collapsed; disappears once every session in it is hidden
+            const otherVisible = other.filter(s => !this.isHidden(s));
+            if (otherVisible.length > 0) {
                 items.push(new MutagenTreeItem({
-                    type: 'group', kind: 'other', label: `Other Sessions (${otherVisible.length})`, icon: 'folder-library',
+                    type: 'group', kind: 'other', label: `Other Sessions (${otherVisible.length})`,
+                    icon: 'folder-library', sessions: otherVisible,
                 }));
             }
 
-            if (this.sessions.some(s => this.hiddenNames.has(s.name))) {
-                items.push(new MutagenTreeItem({ type: 'group', kind: 'hidden', label: 'Hidden Sessions', icon: 'eye-closed' }));
+            if (this.sessions.some(this.isHidden)) {
+                items.push(new MutagenTreeItem({
+                    type: 'group', kind: 'hidden', label: 'Hidden Sessions', icon: 'eye-closed',
+                    sessions: this.sessions.filter(this.isHidden),
+                }));
             }
             return items;
         }
 
         if (element.data.type === 'group') {
-            if (element.data.kind === 'hidden') {
-                return this.sessions
-                    .filter(s => this.hiddenNames.has(s.name))
-                    .map(s => new MutagenTreeItem({ type: 'session', session: s, hidden: true }));
-            }
-            const { other } = partitionSessions(this.sessions, this.folders, this.projects);
-            return other
-                .filter(s => !this.hiddenNames.has(s.name))
-                .map(s => new MutagenTreeItem({ type: 'session', session: s, hidden: false }));
+            const hidden = element.data.kind === 'hidden';
+            return element.data.sessions.map(s => new MutagenTreeItem({ type: 'session', session: s, hidden }));
         }
 
         if (element.data.type === 'project') {
-            const { workspace } = partitionSessions(this.sessions, this.folders, this.projects);
-            return this.projectSessions(element.data.project, workspace)
+            return element.data.sessions
+                .filter(s => !this.isHidden(s))
                 .map(s => new MutagenTreeItem({ type: 'session', session: s, hidden: false }));
         }
 

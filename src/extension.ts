@@ -235,7 +235,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
         vscode.commands.registerCommand('mutagen.projectTerminate', async (item: MutagenTreeItem) => {
             if (item?.data.type !== 'project') return;
-            const { project, sessionCount } = item.data;
+            const { project } = item.data;
+            const sessionCount = item.data.sessions.length;
             const confirm = vscode.workspace.getConfiguration('mutagen').get<boolean>('confirmTerminate', true);
             if (confirm) {
                 const answer = await vscode.window.showWarningMessage(
@@ -250,6 +251,30 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             } catch (err: unknown) {
                 vscode.window.showErrorMessage(`Project terminate failed: ${err instanceof Error ? err.message : err}`);
             }
+            await refresh();
+        }),
+
+        vscode.commands.registerCommand('mutagen.hideProject', async (item: MutagenTreeItem) => {
+            if (item?.data.type !== 'project') return;
+            const hidden = getHiddenNames();
+            item.data.sessions.forEach(s => hidden.add(s.name));
+            await setHiddenNames(hidden);
+            await refresh();
+        }),
+
+        vscode.commands.registerCommand('mutagen.unhideProject', async (item: MutagenTreeItem) => {
+            if (item?.data.type !== 'project') return;
+            const hidden = getHiddenNames();
+            item.data.sessions.forEach(s => hidden.delete(s.name));
+            await setHiddenNames(hidden);
+            await refresh();
+        }),
+
+        vscode.commands.registerCommand('mutagen.hideOtherSessions', async (item: MutagenTreeItem) => {
+            if (item?.data.type !== 'group' || item.data.kind !== 'other') return;
+            const hidden = getHiddenNames();
+            item.data.sessions.forEach(s => hidden.add(s.name));
+            await setHiddenNames(hidden);
             await refresh();
         }),
 
