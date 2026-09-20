@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0] — 2026-09-20
+
+### Added
+
+- Workspace scoping: sessions whose local endpoint lies inside an open workspace folder (or whose project is locked there) are shown at the top level; all others go to a collapsed "Other Sessions" group. Status bar counts and Pause All / Resume All only cover workspace sessions
+- `mutagen.otherSessions` setting (`collapsed` | `hidden`)
+- Project node for a `mutagen.yml` in a workspace folder, with inline Start (`mutagen project start`) and Terminate (`mutagen project terminate`) buttons. A stale `mutagen.yml.lock` without sessions shows both
+
+### Changed
+
+- Session list is read with `mutagen sync list -l` to pick up the `io.mutagen.project` label
+
 ## [0.1.1] — 2026-05-08
 
 ### Added

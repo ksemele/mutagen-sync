@@ -39,13 +39,31 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         await context.workspaceState.update('hiddenSessions', [...names]);
     }
 
+    function workspaceFolders(): string[] {
+        return vscode.workspace.workspaceFolders?.map(f => f.uri.fsPath) ?? [];
+    }
+
+    /** Sessions the workflow operates on: those tied to the open workspace (all, if no workspace). */
+    async function listWorkspaceSessions(): Promise<service.SyncSession[]> {
+        const folders = workspaceFolders();
+        const [sessions, projects] = await Promise.all([
+            service.listSessions(mutagenPath as string),
+            service.findProjects(folders),
+        ]);
+        return service.partitionSessions(sessions, folders, projects).workspace;
+    }
+
     async function refresh(): Promise<void> {
         try {
-            const sessions = await service.listSessions(mutagenPath as string);
+            const folders = workspaceFolders();
+            const [sessions, projects] = await Promise.all([
+                service.listSessions(mutagenPath as string),
+                service.findProjects(folders),
+            ]);
             const hidden = getHiddenNames();
-            provider.update(sessions, undefined, hidden);
-            const visible = sessions.filter(s => !hidden.has(s.name));
-            updateStatusBar(statusBar, visible);
+            provider.update(sessions, undefined, hidden, folders, projects);
+            const { workspace } = service.partitionSessions(sessions, folders, projects);
+            updateStatusBar(statusBar, workspace.filter(s => !hidden.has(s.name)));
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : String(err);
             const clean = msg.replace(/^Command failed: .*\n/, '').trim();
@@ -132,7 +150,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
         vscode.commands.registerCommand('mutagen.pauseAll', async () => {
             try {
-                const sessions = await service.listSessions(mutagenPath as string);
+                const sessions = await listWorkspaceSessions();
                 const active = sessions.filter(s => s.status === 'watching' || s.status === 'syncing' || s.status === 'connecting');
                 await Promise.all(active.map(s => service.pauseSession(mutagenPath as string, s.name)));
             } catch (err: unknown) {
@@ -143,7 +161,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
         vscode.commands.registerCommand('mutagen.resumeAll', async () => {
             try {
-                const sessions = await service.listSessions(mutagenPath as string);
+                const sessions = await listWorkspaceSessions();
                 const inactive = sessions.filter(s => s.status === 'paused' || s.status === 'halted' || s.status === 'disconnected');
                 await Promise.all(inactive.map(s => service.resumeSession(mutagenPath as string, s.name)));
             } catch (err: unknown) {
@@ -180,6 +198,38 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             }
             await refresh();
         }),
+
+        vscode.commands.registerCommand('mutagen.projectStart', async (item: MutagenTreeItem) => {
+            if (item?.data.type !== 'project') return;
+            try {
+                await service.projectStart(mutagenPath as string, item.data.project);
+            } catch (err: unknown) {
+                vscode.window.showErrorMessage(`Project start failed: ${err instanceof Error ? err.message : err}`);
+            }
+            await refresh();
+        }),
+
+        vscode.commands.registerCommand('mutagen.projectTerminate', async (item: MutagenTreeItem) => {
+            if (item?.data.type !== 'project') return;
+            const { project, sessionCount } = item.data;
+            const confirm = vscode.workspace.getConfiguration('mutagen').get<boolean>('confirmTerminate', true);
+            if (confirm) {
+                const answer = await vscode.window.showWarningMessage(
+                    `Terminate mutagen project "${project.name}" (${sessionCount} session${sessionCount === 1 ? '' : 's'})? This cannot be undone.`,
+                    { modal: true },
+                    'Terminate'
+                );
+                if (answer !== 'Terminate') return;
+            }
+            try {
+                await service.projectTerminate(mutagenPath as string, project);
+            } catch (err: unknown) {
+                vscode.window.showErrorMessage(`Project terminate failed: ${err instanceof Error ? err.message : err}`);
+            }
+            await refresh();
+        }),
+
+        vscode.workspace.onDidChangeWorkspaceFolders(() => refresh()),
 
         vscode.commands.registerCommand('mutagen.openSettings', () => {
             vscode.commands.executeCommand('workbench.action.openSettings', '@ext:ksemele.mutagen-sync');

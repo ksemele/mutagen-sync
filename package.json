@@ -2,7 +2,7 @@
   "name": "mutagen-sync",
   "displayName": "Mutagen Sync",
   "description": "Monitor and control Mutagen sync sessions",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "publisher": "ksemele",
   "license": "MIT",
   "repository": {
@@ -98,6 +98,16 @@
         "command": "mutagen.terminateSession",
         "title": "Mutagen: Terminate Session",
         "icon": "$(trash)"
+      },
+      {
+        "command": "mutagen.projectStart",
+        "title": "Mutagen: Start Project",
+        "icon": "$(debug-start)"
+      },
+      {
+        "command": "mutagen.projectTerminate",
+        "title": "Mutagen: Terminate Project",
+        "icon": "$(trash)"
       }
     ],
     "menus": {
@@ -168,6 +178,16 @@
           "command": "mutagen.terminateSession",
           "when": "view == mutagenSessions && viewItem =~ /^session-/",
           "group": "inline@4"
+        },
+        {
+          "command": "mutagen.projectStart",
+          "when": "view == mutagenSessions && viewItem =~ /^project-(stopped|stale)$/",
+          "group": "inline@1"
+        },
+        {
+          "command": "mutagen.projectTerminate",
+          "when": "view == mutagenSessions && viewItem =~ /^project-(running|stale)$/",
+          "group": "inline@2"
         }
       ]
     },
@@ -214,6 +234,19 @@
           "type": "boolean",
           "default": true,
           "description": "Ask for confirmation before terminating a session"
+        },
+        "mutagen.otherSessions": {
+          "type": "string",
+          "enum": [
+            "collapsed",
+            "hidden"
+          ],
+          "default": "collapsed",
+          "enumDescriptions": [
+            "Show sessions not tied to the open workspace in a collapsed 'Other Sessions' group",
+            "Do not show sessions not tied to the open workspace"
+          ],
+          "description": "How to show sessions that don't belong to the open workspace (no local endpoint inside it and not part of its mutagen.yml project)"
         }
       }
     }
