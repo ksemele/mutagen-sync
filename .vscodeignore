@@ -6,7 +6,7 @@ DEVELOPMENT.md
 node_modules/
 tsconfig.json
 .gitignore
-*.map
+**/*.map
 *.vsix
 images/icon.svg
 test-env/keys/

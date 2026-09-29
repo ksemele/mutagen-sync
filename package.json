@@ -2,7 +2,7 @@
   "name": "mutagen-sync",
   "displayName": "Mutagen Sync",
   "description": "Monitor and control Mutagen sync sessions",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "publisher": "ksemele",
   "license": "MIT",
   "repository": {
@@ -98,6 +98,41 @@
         "command": "mutagen.terminateSession",
         "title": "Mutagen: Terminate Session",
         "icon": "$(trash)"
+      },
+      {
+        "command": "mutagen.projectStart",
+        "title": "Mutagen: Start Project",
+        "icon": "$(debug-start)"
+      },
+      {
+        "command": "mutagen.projectTerminate",
+        "title": "Mutagen: Terminate Project",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "mutagen.projectPause",
+        "title": "Mutagen: Pause Project",
+        "icon": "$(debug-pause)"
+      },
+      {
+        "command": "mutagen.projectResume",
+        "title": "Mutagen: Resume Project",
+        "icon": "$(debug-start)"
+      },
+      {
+        "command": "mutagen.hideProject",
+        "title": "Mutagen: Hide Project Sessions",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "mutagen.unhideProject",
+        "title": "Mutagen: Show Project Sessions",
+        "icon": "$(eye-closed)"
+      },
+      {
+        "command": "mutagen.hideOtherSessions",
+        "title": "Mutagen: Hide Other Sessions",
+        "icon": "$(eye)"
       }
     ],
     "menus": {
@@ -168,6 +203,41 @@
           "command": "mutagen.terminateSession",
           "when": "view == mutagenSessions && viewItem =~ /^session-/",
           "group": "inline@4"
+        },
+        {
+          "command": "mutagen.projectStart",
+          "when": "view == mutagenSessions && viewItem =~ /^project-(stopped|stale)$/",
+          "group": "inline@1"
+        },
+        {
+          "command": "mutagen.projectPause",
+          "when": "view == mutagenSessions && viewItem =~ /^project-running-(active|mixed)(-hidden)?$/",
+          "group": "inline@1"
+        },
+        {
+          "command": "mutagen.projectResume",
+          "when": "view == mutagenSessions && viewItem =~ /^project-running-(paused|mixed)(-hidden)?$/",
+          "group": "inline@2"
+        },
+        {
+          "command": "mutagen.hideProject",
+          "when": "view == mutagenSessions && viewItem =~ /^project-running-[a-z]+$/",
+          "group": "inline@3"
+        },
+        {
+          "command": "mutagen.unhideProject",
+          "when": "view == mutagenSessions && viewItem =~ /^project-running-[a-z]+-hidden$/",
+          "group": "inline@3"
+        },
+        {
+          "command": "mutagen.projectTerminate",
+          "when": "view == mutagenSessions && viewItem =~ /^project-(running-.*|stale)$/",
+          "group": "inline@4"
+        },
+        {
+          "command": "mutagen.hideOtherSessions",
+          "when": "view == mutagenSessions && viewItem == group-other",
+          "group": "inline@1"
         }
       ]
     },
@@ -214,6 +284,11 @@
           "type": "boolean",
           "default": true,
           "description": "Ask for confirmation before terminating a session"
+        },
+        "mutagen.workspaceMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "Scope the panel to the open workspace: sessions with a local endpoint inside a workspace folder (or belonging to its mutagen.yml project) are listed first, grouped under a project node with Start / Pause / Resume / Terminate buttons; Pause All / Resume All cover only those sessions (the status bar always covers all). Off: flat list of all sessions"
         }
       }
     }
@@ -222,12 +297,15 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "package": "mkdir -p dist && vsce package --out dist/ --no-dependencies",
-    "publish": "vsce publish --no-dependencies"
+    "publish": "npm run publish:vsce && npm run publish:ovsx",
+    "publish:vsce": "vsce publish --packagePath dist/$npm_package_name-$npm_package_version.vsix",
+    "publish:ovsx": "ovsx publish dist/$npm_package_name-$npm_package_version.vsix"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@types/vscode": "^1.85.0",
     "@vscode/vsce": "^3.9.1",
+    "ovsx": "^1.2.0",
     "typescript": "^5.3.0"
   }
 }

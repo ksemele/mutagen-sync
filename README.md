@@ -14,6 +14,7 @@ Monitor and control [Mutagen](https://mutagen.io) sync sessions directly from VS
 - **Bulk actions** — Pause All / Resume All from the panel toolbar
 - **Auto-refresh** — every 10 seconds (configurable)
 - **Hidden sessions** — hide sessions from the main list without terminating them
+- **Workspace mode** (opt-in, `mutagen.workspaceMode`) — sessions tied to the open workspace come first, grouped under a project node for its `mutagen.yml` with Start / Pause / Resume / Terminate buttons (`mutagen project …`); everything else sits in a collapsed "Other Sessions" group and stays out of Pause/Resume All (the status bar always covers every session). Eye buttons on a project node or on "Other Sessions" move the whole group into Hidden Sessions
 
 ## Screenshots
 
@@ -25,6 +26,9 @@ Monitor and control [Mutagen](https://mutagen.io) sync sessions directly from VS
 
 ![Panel with less colors](images/panel_colorless.png)
 *You can disable some colors in the settings and more*
+
+![Workspace mode with a project node](images/workspace.png)
+*Workspace mode: the `mutagen.yml` project of the open folder with its sessions, everything else collapsed under Other Sessions*
 
 ## Requirements
 
@@ -50,6 +54,7 @@ Full installation guide: [mutagen.io](https://mutagen.io) · [GitHub releases](h
 | `mutagen.coloredIcons` | `true` | Use colored icons in the session tree view |
 | `mutagen.alphaLabel` | `α` | Label for the alpha endpoint in tree view tooltips |
 | `mutagen.betaLabel` | `β` | Label for the beta endpoint in tree view tooltips |
-| `mutagen.confirmTerminate` | `true` | Ask for confirmation before terminating a session (termination is permanent and cannot be undone) |
+| `mutagen.confirmTerminate` | `true` | Ask for confirmation before terminating a session or project (termination is permanent and cannot be undone) |
+| `mutagen.workspaceMode` | `false` | Scope the panel to the open workspace and show project nodes with Start / Terminate |
 
 Open settings: **Cmd+,** → search `mutagen`, or click the gear icon in the Mutagen Sync panel.

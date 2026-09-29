@@ -85,9 +85,11 @@ This project uses [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH
      --notes "See CHANGELOG.md"
    ```
 
-6. **Publish to VS Code Marketplace**:
+6. **Publish to VS Code Marketplace and Open VSX** (both use the VSIX built in step 3):
    ```bash
-   npm run publish
+   npm run publish          # both registries
+   npm run publish:vsce     # VS Code Marketplace only
+   npm run publish:ovsx     # Open VSX only
    ```
 
 ---
@@ -124,6 +126,29 @@ npm run publish
 
 The extension appears on the Marketplace within a few minutes:
 `https://marketplace.visualstudio.com/items?itemName=ksemele.mutagen-sync`
+
+---
+
+## Publishing to Open VSX
+
+Open VSX is the registry used by VSCodium, Cursor, Windsurf, Gitpod and other VS Code forks.
+
+### One-time setup
+
+1. **Sign in** at [open-vsx.org](https://open-vsx.org/) with GitHub and sign the Eclipse Publisher Agreement.
+2. **Create an access token** at [open-vsx.org/user-settings/tokens](https://open-vsx.org/user-settings/tokens).
+3. **Export it** before publishing:
+   ```bash
+   export OVSX_PAT=<token>
+   ```
+
+### Publishing
+
+```bash
+npm run publish:ovsx
+```
+
+The extension appears at `https://open-vsx.org/extension/ksemele/mutagen-sync`.
 
 ---
 

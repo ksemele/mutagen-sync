@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0] — 2026-09-29
+
+### Added
+
+- Workspace mode (`mutagen.workspaceMode`, off by default): sessions whose local endpoint lies inside an open workspace folder (or whose project is locked there) are shown at the top level; all others go to a collapsed "Other Sessions" group, grouped by project there as well. Pause All / Resume All only cover workspace sessions; the status bar keeps counting every session
+- Eye buttons on a project node and on "Other Sessions" hide / unhide the whole group via the existing Hidden Sessions mechanism
+- In workspace mode, a `mutagen.yml` in a workspace folder shows as a project node with inline Start / Pause / Resume / Terminate buttons (`mutagen project start|pause|resume|terminate`). A stale `mutagen.yml.lock` without sessions shows both
+
+### Changed
+
+- Session list is read with `mutagen sync list -l` to pick up the `io.mutagen.project` label
+
 ## [0.1.1] — 2026-05-08
 
 ### Added
